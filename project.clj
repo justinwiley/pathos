@@ -8,6 +8,9 @@
     [org.clojure/clojure "1.5.1"]
     [clojure-opennlp "0.3.2"]
     [org.clojure/tools.trace "0.7.6"]
+    [iron_mq_clojure "1.0.3"]
+    [org.clojure/data.json "0.2.4"]
+    [inflections "0.9.5"]
   ]
   :main ^:skip-aot pathos.core
   :target-path "target/%s"
