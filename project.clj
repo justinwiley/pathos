@@ -12,6 +12,7 @@
     [org.clojure/data.json "0.2.4"]
     [inflections "0.9.5"]
     [midje "1.5.1"]
+    [clj-yaml "0.4.0"]
   ]
   :main ^:skip-aot pathos.core
   :target-path "target/%s"

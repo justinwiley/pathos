@@ -6,6 +6,7 @@
 (use 'opennlp.treebank)
 (require '[iron-mq-clojure.client :as mq])
 (require '[clojure.data.json :as json])
+(require '[clj-yaml.core :as yaml])
 
 
 ; --- open nlp name processing
@@ -21,6 +22,8 @@
   (distinct (flatten (map finder (map tokenize (get-sentences text))))))
 
 ; --- iron.io queue functions
+
+(def api-tokens (yaml/parse-string (slurp "resources/api-tokens.yml")))
 
 (def client (mq/create-client "" ""))
 

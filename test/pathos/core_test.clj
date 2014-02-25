@@ -25,8 +25,13 @@
 
     (testing "get-all should return distinct elements"
         (let [para "My name is John Valjean.  John Valjean!"]
-          (is (= '("John Valjean"), (get-all names para))))))
+          (is (= '("John Valjean") (get-all names para))))))
 
   (deftest test-process-json-message
    (testing "it should extract text data from json, return processed results"
-     (is (= expected-processed-message, (process-json-message json-message)))))
+     (is (= expected-processed-message (process-json-message json-message)))))
+
+
+  (deftest test-api-tokens
+    (testing "it should read api tokens from disk, define"
+      (is (= false (empty? (:ironio api-tokens))))))
