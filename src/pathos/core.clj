@@ -37,20 +37,15 @@
 
 ; --- message extraction
 
-
-(defn process-json-message [raw-json]
-  (let [message (json/read-str raw-json  :key-fn keyword)]
-    (merge message
-           {:names (get-all names (:comment message))
-            :locations (get-all locations (:comment message))
-            :dates (get-all dates (:comment message))
-            :orgs (get-all orgs (:comment message))
-            })
-  ))
-
-(def raw-json "{\"id\": 111, \"comment\": \"Heres a sample comment about John and Sarah, two people from Arizona.  We stayed in the University of North Carolina waiting room from Monday January 15th 2004.\"}")
-
-(process-json-message raw-json)
+(defn process-json-message [json-message]
+  (let [message (json/read-str json-message :key-fn keyword)]
+    {
+      :id (:id message)
+      :names (get-all names (:comment message))
+      :locations (get-all locations (:comment message))
+      :dates (get-all dates (:comment message))
+      :orgs (get-all orgs (:comment message))
+    }))
 
 
 (defn process-messages [messages] (messages) )
