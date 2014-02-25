@@ -11,7 +11,13 @@
     [iron_mq_clojure "1.0.3"]
     [org.clojure/data.json "0.2.4"]
     [inflections "0.9.5"]
+    [midje "1.5.1"]
   ]
   :main ^:skip-aot pathos.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :plugins [[lein-midje "3.0.0"]]
+  :profiles {
+    :uberjar {:aot :all}
+    :dev {:dependencies [[midje "1.5.1"]]}
+  }
+)

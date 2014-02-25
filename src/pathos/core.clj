@@ -1,24 +1,18 @@
 (ns pathos.core
   (:gen-class))
 
+(use 'inflections.core)
 (use 'opennlp.nlp)
 (use 'opennlp.treebank)
-;; (use 'inflections.core)
 (require '[iron-mq-clojure.client :as mq])
 (require '[clojure.data.json :as json])
-
-
-;; (for [fname ["person" "location" "date" "org"]]
-;;   (let [plural-name (plural)])
-;;   (def (plural fname) (make-name-finder (str "models/en-ner-" fname ".bin")))
-;; )
 
 
 ; --- open nlp name processing
 
 (def get-sentences (make-sentence-detector "models/en-sent.bin"))
 (def tokenize (make-tokenizer "models/en-token.bin"))
-(def people (make-name-finder "models/en-ner-person.bin"))
+(def names (make-name-finder "models/en-ner-name.bin"))
 (def locations (make-name-finder "models/en-ner-location.bin"))
 (def dates (make-name-finder "models/en-ner-date.bin"))
 (def orgs (make-name-finder "models/en-ner-organization.bin"))
@@ -47,7 +41,7 @@
 (defn process-json-message [raw-json]
   (let [message (json/read-str raw-json  :key-fn keyword)]
     (merge message
-           {:names (get-all people (:comment message))
+           {:names (get-all names (:comment message))
             :locations (get-all locations (:comment message))
             :dates (get-all dates (:comment message))
             :orgs (get-all orgs (:comment message))
@@ -58,6 +52,8 @@
 
 (process-json-message raw-json)
 
+
+(defn process-messages [messages] (messages) )
 
 (defn -main
   "I don't do a whole lot ... yet."
