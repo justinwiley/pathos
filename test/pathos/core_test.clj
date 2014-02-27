@@ -41,7 +41,11 @@
 
   ; --- json transformation
 
-
+  (deftest test-from-and-to-json
+    (testing "from-json should convert a series of json blobs to maps "
+      (is (= [{:a 1} {:b 2}] (from-json ["{\"a\": 1}"  "{\"b\": 2}"]))))
+    (testing "to-json should convert a series of json blobs to maps "
+      (is (= ["{\"a\":1}" "{\"b\":2}"] (to-json [{:a 1} {:b 2}])))))
 
   ; --- comment processing
 

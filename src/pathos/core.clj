@@ -7,9 +7,6 @@
   (:use [opennlp.treebank])
 )
 
-
-
-
 ; --- open nlp name processing
 
 (def get-sentences (make-sentence-detector "models/en-sent.bin"))
