@@ -1,12 +1,13 @@
 (ns pathos.core
-  (:gen-class))
+  (:gen-class)
+  (:require [cheshire.core :refer :all]
+            [iron-mq-clojure.client :as mq]
+            [clj-yaml.core :as yaml])
+  (:use [opennlp.nlp])
+  (:use [opennlp.treebank])
+)
 
-(use 'inflections.core)
-(use 'opennlp.nlp)
-(use 'opennlp.treebank)
-(require '[iron-mq-clojure.client :as mq])
-(require '[clojure.data.json :as json])
-(require '[clj-yaml.core :as yaml])
+
 
 
 ; --- open nlp name processing
@@ -21,37 +22,49 @@
 (defn get-all [finder text]
   (distinct (flatten (map finder (map tokenize (get-sentences text))))))
 
-; --- iron.io queue functions
+; --- iron.io functions
 
 (def api-tokens (yaml/parse-string (slurp "resources/api-tokens.yml")))
+(def ironio (:ironio api-tokens))
+(def client (mq/create-client (:token ironio) (:project_id ironio)))
+(def receive-queue "new-comments")
+(def send-queue "processed-comments")
 
-(def client (mq/create-client "" ""))
+(defn logit [client msg]
+  (let [logmsg {:time (str (new java.util.Date)) :msg msg}]
+    (mq/post-message client "log" (generate-string logmsg true))))
 
-(defn get-message [queue client]
-  (let [msg (mq/get-message client queue)]
-    (if msg
-      (do
-        (println (get msg "body"))
-        (mq/delete-message client queue msg))
-      (println "queue is empty"))))
+(defn get-messages [client queue n]
+  (map (fn [m] ())(mq/get-messages [client queue n])))
 
-; (mq/post-message client "myqueue" "hello from clojure")
+; --- json transformation
 
+(defn from-json [msgs]
+   (map (fn [c] (parse-string c true)) msgs))
 
-; --- message extraction
+(defn to-json [msgs]
+   (map (fn [c] (generate-string c)) msgs))
 
-(defn process-json-message [json-message]
-  (let [message (json/read-str json-message :key-fn keyword)]
-    {
-      :id (:id message)
-      :names (get-all names (:comment message))
-      :locations (get-all locations (:comment message))
-      :dates (get-all dates (:comment message))
-      :orgs (get-all orgs (:comment message))
-    }))
+; --- comment processing
 
+(defn extract-text-artifacts [comment-map]
+  {
+    :text_response_id (:text_response_id comment-map)
+    :names (get-all names (:comment comment-map))
+    :locations (get-all locations (:comment comment-map))
+    :dates (get-all dates (:comment comment-map))
+    :orgs (get-all orgs (:comment comment-map))
+  })
 
-(defn process-messages [messages] (messages) )
+(defn process-messages [comment-maps]
+  (map extract-text-artifacts comment-maps))
+
+; --- main loop
+
+(defn process [client receive-queue send-queue]
+  (let [processed-messages (process-messages (from-json (get-messages [client receive-queue 1000])))]
+    (mq/post-messages client send-queue (to-json processed-messages))))
+
 
 (defn -main
   "I don't do a whole lot ... yet."
